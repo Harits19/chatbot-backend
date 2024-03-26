@@ -1,6 +1,6 @@
 import { Client, ClientSession, LocalAuth } from "whatsapp-web.js";
 import qrcode from "qrcode-terminal";
-import { chatbotService } from "./chatbot-service";
+import { chatbotService } from "../service/chatbot-service";
 
 export class WhatsappClient extends Client {
   listenClient() {

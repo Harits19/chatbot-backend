@@ -1,5 +1,5 @@
 import WAWebJS from "whatsapp-web.js";
-import { whatsappClient } from "./whatsapp-client";
+import { whatsappClient } from "../client/whatsapp-client";
 
 export class ChatbotService {
   onReceiveMessage(message: WAWebJS.Message) {

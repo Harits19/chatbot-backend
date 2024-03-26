@@ -1,8 +1,8 @@
 import express, { Express, Request, Response } from "express";
-import { whatsappClient } from "./src/whatsapp-client";
-import { mongoClient } from "./src/mongo-client";
+import { whatsappClient } from "./src/client/whatsapp-client";
+import { mongoClient } from "./src/client/mongo-client";
 import dotenv from "dotenv";
-import { ENV } from "./src/env-constant";
+import { ENV } from "./src/constan/env-constant";
 
 export class Main {
   app = express();

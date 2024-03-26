@@ -1,5 +1,5 @@
 import { MongoClient as BaseMongoClient } from "mongodb";
-import { ENV } from "./env-constant";
+import { ENV } from "../constan/env-constant";
 
 export class MongoClient extends BaseMongoClient {
   async init() {
