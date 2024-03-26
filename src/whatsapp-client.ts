@@ -1,34 +1,30 @@
-import { Client } from "whatsapp-web.js";
+import { Client, ClientSession, LocalAuth } from "whatsapp-web.js";
 import qrcode from "qrcode-terminal";
+import { messageService } from "./message-service";
 
-export class WhatsappClient {
+export class WhatsappClient extends Client {
   listenClient() {
-    console.log("start listen client");
-
+    console.log("start listen client test");
     // Create a new client instance
-    const client = new Client({});
 
     // When the client is ready, run this code (only once)
-    client.once("ready", () => {
+    this.once("ready", () => {
       console.log("Client is ready!");
     });
 
     // When the client received QR-Code
-    client.on("qr", (qr) => {
+    this.on("qr", (qr) => {
       console.log("QR RECEIVED", qr);
       qrcode.generate(qr, { small: true });
     });
 
-    client.on("message_create", (message) => {
-      if (message.body === "ping") {
-        // send back "pong" to the chat the message was sent in
-        client.sendMessage(message.from, "pong");
-      }
-    });
+    this.on("message_create", messageService.onReceiveMessage);
 
     // Start your client
-    client.initialize();
+    this.initialize();
   }
 }
 
-export const whatsappClient = new WhatsappClient();
+export const whatsappClient = new WhatsappClient({
+  authStrategy: new LocalAuth(),
+});
