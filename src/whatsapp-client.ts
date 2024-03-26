@@ -1,6 +1,6 @@
 import { Client, ClientSession, LocalAuth } from "whatsapp-web.js";
 import qrcode from "qrcode-terminal";
-import { messageService } from "./message-service";
+import { chatbotService } from "./chatbot-service";
 
 export class WhatsappClient extends Client {
   listenClient() {
@@ -18,7 +18,7 @@ export class WhatsappClient extends Client {
       qrcode.generate(qr, { small: true });
     });
 
-    this.on("message_create", messageService.onReceiveMessage);
+    this.on("message_create", chatbotService.onReceiveMessage);
 
     // Start your client
     this.initialize();

@@ -1,7 +1,7 @@
 import WAWebJS from "whatsapp-web.js";
 import { whatsappClient } from "./whatsapp-client";
 
-export class MessageService {
+export class ChatbotService {
   onReceiveMessage(message: WAWebJS.Message) {
     try {
       console.log("receive message", message.body);
@@ -15,4 +15,4 @@ export class MessageService {
   }
 }
 
-export const messageService = new MessageService();
+export const chatbotService = new ChatbotService();

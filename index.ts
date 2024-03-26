@@ -1,5 +1,8 @@
 import express, { Express, Request, Response } from "express";
 import { whatsappClient } from "./src/whatsapp-client";
+import { mongoClient } from "./src/mongo-client";
+import dotenv from "dotenv";
+import { ENV } from "./src/env-constant";
 
 export class Main {
   app = express();
@@ -13,6 +16,10 @@ export class Main {
     console.log("init application");
 
     whatsappClient.listenClient();
+
+    console.log(ENV.MONGO_CLIENT);
+
+    mongoClient.init();
 
     this.app.get("/ping", (req: Request, res: Response) => {
       res.send("pong");
