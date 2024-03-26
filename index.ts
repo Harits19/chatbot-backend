@@ -1,12 +1,29 @@
 import express, { Express, Request, Response } from "express";
+import { whatsappClient } from "./src/whatsapp-client";
 
-const app: Express = express();
-const port = process.env.PORT || 3000;
+export class Main {
+  app = express();
+  port = process.env.PORT || 3000;
 
-app.get("/ping", (req: Request, res: Response) => {
-  res.send("pong");
-});
+  constructor() {
+    this.init();
+  }
 
-app.listen(port, () => {
-  console.log(`[server]: Server is running at http://localhost:${port}`);
-});
+  init() {
+    console.log("init application");
+
+    whatsappClient.listenClient();
+
+    this.app.get("/ping", (req: Request, res: Response) => {
+      res.send("pong");
+    });
+
+    this.app.listen(this.port, () => {
+      console.log(
+        `[server]: Server is running at http://localhost:${this.port}`
+      );
+    });
+  }
+}
+
+new Main();
