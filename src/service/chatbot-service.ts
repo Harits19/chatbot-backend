@@ -5,9 +5,9 @@ import { ChatbotStep } from "../model/chatbot-model";
 import { sessionRepo } from "../repo/session-repo";
 
 export class ChatbotService {
-  onReceiveMessage = async (message: WAWebJS.Message) => {
+  onReceiveMessage = async (triggerMessage: WAWebJS.Message) => {
     try {
-      const { body, to: botNumber, from: senderNumber } = message;
+      const { body, to: botNumber, from: senderNumber } = triggerMessage;
 
       console.log({ senderNumber, botNumber, body });
 
@@ -41,11 +41,22 @@ export class ChatbotService {
           return;
         }
 
-        await sessionRepo.createSession(senderNumber, botNumber);
+        const stepMessage = new ChatbotStep(steps);
 
-        const nextMessage = new ChatbotStep(steps);
-
-        await whatsappClient.sendMessage(senderNumber, nextMessage.format);
+        const nextMessage = await whatsappClient.sendMessage(
+          senderNumber,
+          stepMessage.format
+        );
+        await sessionRepo.createSession(senderNumber, botNumber, [
+          {
+            type: "inbound",
+            response: triggerMessage,
+          },
+          {
+            type: "outbound",
+            response: nextMessage,
+          },
+        ]);
       }
     } catch (error) {
       console.error("onReceiveMessage error", error);

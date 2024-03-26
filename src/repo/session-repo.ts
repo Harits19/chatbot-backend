@@ -1,5 +1,5 @@
 import { mongoClient } from "../client/mongo-client";
-import { SessionModel } from "../model/session-model";
+import { SessionMessage, SessionModel } from "../model/session-model";
 import { uid } from "../util/string-util";
 
 export class SessionRepo {
@@ -18,17 +18,20 @@ export class SessionRepo {
     return checkNumber ?? undefined;
   };
 
-  createSession = async (from: string, botNumber: string) => {
+  createSession = async (
+    from: string,
+    botNumber: string,
+    message: SessionMessage[]
+  ) => {
     const newSession: SessionModel = {
       _id: uid(),
       botNumber,
       from,
       createdAt: new Date(),
       updatedAt: new Date(),
+      messages: message,
     };
-    const result = await this.collection.insertOne(newSession);
-
-    console.log("result create session", result);
+    await this.collection.insertOne(newSession);
   };
 }
 
