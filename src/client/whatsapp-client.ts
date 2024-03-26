@@ -18,7 +18,7 @@ export class WhatsappClient extends Client {
       qrcode.generate(qr, { small: true });
     });
 
-    this.on("message_create", chatbotService.onReceiveMessage);
+    this.on("message", chatbotService.onReceiveMessage);
 
     // Start your client
     this.initialize();

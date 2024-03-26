@@ -1,4 +1,5 @@
 export interface ChatbotModel {
+  _id?: string;
   botNumber: string;
   trigger: string[];
   steps: IChatbotStep[];
@@ -38,15 +39,15 @@ export class ChatbotStep implements IChatbotStep {
   private get formatOption() {
     if (!this.option) return "";
 
-    return `\n${this.option
+    return `\n\n${this.option
       .map((item) => ` - ${item.index} *${item.text}*  `)
-      .join("\n")}\n`;
+      .join("\n")}\n\nSilahkan pilih opsi dengan angka yang tertera`;
   }
 }
 
 export const dummyRepo: ChatbotModel[] = [
   {
-    botNumber: "6283840493135",
+    botNumber: "6283840493135@c.us",
     trigger: ["test chatbot"],
     steps: [
       {
