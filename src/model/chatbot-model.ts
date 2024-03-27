@@ -5,27 +5,32 @@ export interface ChatbotModel {
   steps: IChatbotStep[];
 }
 
+export interface ChatbotOption {
+  key: string;
+  text: string;
+  nextStep?: number;
+}
+
+type ResponseType = "free_text" | "body_option";
+
 export interface IChatbotStep {
-  id: number;
+  id?: number;
   body: string;
-  option?: {
-    index: number;
-    text: string;
-    nextStep?: number;
-  }[];
+  responseType: ResponseType;
+  option?: ChatbotOption[];
 }
 
 export class ChatbotStep implements IChatbotStep {
-  id: number;
+  id?: number;
   body: string;
-  option?:
-    | { index: number; text: string; nextStep?: number | undefined }[]
-    | undefined;
+  option?: ChatbotOption[];
+  responseType: ResponseType;
 
   constructor(params: IChatbotStep) {
     this.id = params.id;
     this.body = params.body;
     this.option = params.option;
+    this.responseType = params.responseType;
   }
 
   get format() {
@@ -40,32 +45,33 @@ export class ChatbotStep implements IChatbotStep {
     if (!this.option) return "";
 
     return `\n\n${this.option
-      .map((item) => ` - ${item.index} *${item.text}*  `)
+      .map((item) => ` - ${item.key} *${item.text}*  `)
       .join("\n")}\n\nSilahkan pilih opsi dengan angka yang tertera`;
   }
 }
 
 export const dummyRepo: ChatbotModel[] = [
   {
-    botNumber: "6283840493135@c.us",
+    botNumber: "628881852685@c.us",
     trigger: ["test chatbot"],
     steps: [
       {
         id: 0,
         body: "response chatbot ",
+        responseType: "body_option",
         option: [
           {
-            index: 1,
+            key: "1",
             text: "Option A",
             nextStep: 1,
           },
           {
-            index: 2,
+            key: "2",
             text: "Option B",
             nextStep: 2,
           },
           {
-            index: 3,
+            key: "3",
             text: "Option C",
             nextStep: 3,
           },
@@ -74,14 +80,17 @@ export const dummyRepo: ChatbotModel[] = [
       {
         id: 1,
         body: "response from Option A",
+        responseType: "free_text",
       },
       {
         id: 2,
         body: "response from Option B",
+        responseType: "free_text",
       },
       {
         id: 3,
         body: "response from Option C",
+        responseType: "free_text",
       },
     ],
   },

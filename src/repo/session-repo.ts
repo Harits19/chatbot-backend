@@ -1,21 +1,25 @@
 import { mongoClient } from "../client/mongo-client";
-import { SessionMessage, SessionModel } from "../model/session-model";
+import {
+  SessionMessage,
+  SessionModel,
+  sanitizedMessage,
+} from "../model/session-model";
 import { uid } from "../util/string-util";
 
 export class SessionRepo {
   db = mongoClient.db("chatbot");
   collection = this.db.collection<SessionModel>("chatbot-session");
 
-  isNumberHaveSession = async (from: string, botNumber: string) => {
-    const checkNumber = await this.collection.findOne({
+  findSession = async (from: string, botNumber: string) => {
+    const resultSession = await this.collection.findOne({
       from,
       botNumber,
       finishedAt: {
         $eq: undefined,
       },
     });
-    console.log("result", checkNumber);
-    return checkNumber ?? undefined;
+    console.log("result", resultSession);
+    return resultSession ?? undefined;
   };
 
   createSession = async (
@@ -32,6 +36,10 @@ export class SessionRepo {
       messages: message,
     };
     await this.collection.insertOne(newSession);
+  };
+
+  replaceSession = async (session: SessionModel) => {
+    await this.collection.findOneAndReplace({ _id: session._id }, session);
   };
 }
 

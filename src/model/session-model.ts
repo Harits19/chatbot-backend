@@ -1,8 +1,13 @@
 import WAWebJS from "whatsapp-web.js";
+import { ChatbotOption, IChatbotStep } from "./chatbot-model";
+
+export interface SessionResponse
+  extends Pick<WAWebJS.Message, "body" | "type"> {}
 
 export interface SessionMessage {
   type: "inbound" | "outbound";
-  response: WAWebJS.Message;
+  response: SessionResponse;
+  question?: IChatbotStep;
 }
 
 export interface SessionModel {
@@ -14,3 +19,12 @@ export interface SessionModel {
   finishedAt?: Date;
   messages: SessionMessage[];
 }
+
+export const sanitizedMessage = (
+  response: WAWebJS.Message
+): SessionResponse => {
+  return {
+    body: response.body,
+    type: response.type,
+  };
+};

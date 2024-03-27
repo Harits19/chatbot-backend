@@ -1,23 +1,76 @@
-import WAWebJS from "whatsapp-web.js";
+import { SessionMessage } from "./../model/session-model";
+import WAWebJS, { Buttons, MessageTypes } from "whatsapp-web.js";
 import { whatsappClient } from "../client/whatsapp-client";
 import { chatbotRepo } from "../repo/chatbot-repo";
 import { ChatbotStep } from "../model/chatbot-model";
 import { sessionRepo } from "../repo/session-repo";
+import { unrecognizedStepMessage } from "../constan/chatbot-constan";
 
 export class ChatbotService {
   onReceiveMessage = async (triggerMessage: WAWebJS.Message) => {
+    console.log(JSON.stringify(triggerMessage));
     try {
       const { body, to: botNumber, from: senderNumber } = triggerMessage;
 
       console.log({ senderNumber, botNumber, body });
 
-      const activeSession = await sessionRepo.isNumberHaveSession(
+      const activeSession = await sessionRepo.findSession(
         senderNumber,
         botNumber
       );
 
       if (activeSession) {
         console.log(senderNumber, " have session");
+
+        const lastOutbound = activeSession.messages
+          .reverse()
+          .find((item) => item.type === "outbound");
+
+        if (!lastOutbound) {
+          console.warn("last outbound message outbound undefined");
+          return;
+        }
+        const lastQuestion = lastOutbound?.question;
+
+        if (lastQuestion?.responseType == "body_option") {
+          if (!lastQuestion) {
+            console.error(`question undefined on`, lastOutbound);
+            return;
+          }
+
+          if (!lastQuestion.option || lastQuestion.option.length == 0) {
+            console.error(`option is empty on`, lastOutbound);
+            return;
+          }
+
+          const selectedOption = lastQuestion.option.find(
+            (item) => item.key === triggerMessage.body
+          );
+          console.log({ selectedOption });
+
+          if (!selectedOption) {
+            const resultUnrecognized: SessionMessage = {
+              type: "outbound",
+              response: await whatsappClient.sendMessageStep(
+                senderNumber,
+                unrecognizedStepMessage
+              ),
+            };
+
+            const resultLastQuestion: SessionMessage = {
+              type: "outbound",
+              question: lastQuestion,
+              response: await whatsappClient.sendMessageStep(
+                senderNumber,
+                lastQuestion
+              ),
+            };
+            activeSession.messages.push(
+              ...[resultUnrecognized, resultLastQuestion]
+            );
+            return;
+          }
+        }
       } else {
         console.log(senderNumber, " don't have session");
 
@@ -41,11 +94,9 @@ export class ChatbotService {
           return;
         }
 
-        const stepMessage = new ChatbotStep(steps);
-
-        const nextMessage = await whatsappClient.sendMessage(
+        const nextMessage = await whatsappClient.sendMessageStep(
           senderNumber,
-          stepMessage.format
+          steps
         );
         await sessionRepo.createSession(senderNumber, botNumber, [
           {
@@ -54,6 +105,7 @@ export class ChatbotService {
           },
           {
             type: "outbound",
+            question: steps,
             response: nextMessage,
           },
         ]);

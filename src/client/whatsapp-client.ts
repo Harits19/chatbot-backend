@@ -1,6 +1,17 @@
-import { Client, ClientSession, LocalAuth } from "whatsapp-web.js";
+import {
+  Buttons,
+  Client,
+  ClientSession,
+  LocalAuth,
+  Message,
+  MessageContent,
+  MessageSendOptions,
+  NoAuth,
+} from "whatsapp-web.js";
 import qrcode from "qrcode-terminal";
 import { chatbotService } from "../service/chatbot-service";
+import { ChatbotStep, IChatbotStep } from "../model/chatbot-model";
+import { SessionResponse, sanitizedMessage } from "../model/session-model";
 
 export class WhatsappClient extends Client {
   listenClient() {
@@ -23,6 +34,20 @@ export class WhatsappClient extends Client {
     // Start your client
     this.initialize();
   }
+
+  async sendMessageStep(
+    chatId: string,
+    content: IChatbotStep,
+    options?: MessageSendOptions | undefined
+  ): Promise<SessionResponse> {
+    const newContent = new ChatbotStep(content).format;
+    const result = await this.sendMessage(chatId, newContent, options);
+
+    const mapMessage = sanitizedMessage(result);
+
+    return mapMessage;
+  }
+  
 }
 
 export const whatsappClient = new WhatsappClient({
