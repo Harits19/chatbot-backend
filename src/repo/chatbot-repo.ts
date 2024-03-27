@@ -13,6 +13,10 @@ export class ChatbotRepo {
 
     if (isTriggerFound) return selectedConfig;
   }
+
+  findChatbotById(id: string) {
+    return dummyRepo.find((item) => item._id === id);
+  }
 }
 
 export const chatbotRepo = new ChatbotRepo();

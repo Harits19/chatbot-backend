@@ -1,5 +1,5 @@
 export interface ChatbotModel {
-  _id?: string;
+  _id: string;
   botNumber: string;
   trigger: string[];
   steps: IChatbotStep[];
@@ -52,6 +52,7 @@ export class ChatbotStep implements IChatbotStep {
 
 export const dummyRepo: ChatbotModel[] = [
   {
+    _id: "dummyId",
     botNumber: "628881852685@c.us",
     trigger: ["test chatbot"],
     steps: [

@@ -20,6 +20,7 @@ export class ChatbotService {
       );
 
       if (activeSession) {
+        const { flowId } = activeSession;
         console.log(senderNumber, " have session");
 
         const lastOutbound = activeSession.messages
@@ -48,28 +49,73 @@ export class ChatbotService {
           );
           console.log({ selectedOption });
 
-          if (!selectedOption) {
-            const resultUnrecognized: SessionMessage = {
-              type: "outbound",
-              response: await whatsappClient.sendMessageStep(
-                senderNumber,
-                unrecognizedStepMessage
-              ),
-            };
+          const getNextMessage = async (): Promise<
+            SessionMessage[] | undefined
+          > => {
+            if (!selectedOption) {
+              const resultUnrecognized: SessionMessage = {
+                type: "outbound",
+                response: await whatsappClient.sendMessageStep(
+                  senderNumber,
+                  unrecognizedStepMessage
+                ),
+              };
 
-            const resultLastQuestion: SessionMessage = {
-              type: "outbound",
-              question: lastQuestion,
-              response: await whatsappClient.sendMessageStep(
-                senderNumber,
-                lastQuestion
-              ),
-            };
-            activeSession.messages.push(
-              ...[resultUnrecognized, resultLastQuestion]
+              const resultLastQuestion: SessionMessage = {
+                type: "outbound",
+                question: lastQuestion,
+                response: await whatsappClient.sendMessageStep(
+                  senderNumber,
+                  lastQuestion
+                ),
+              };
+
+              return [resultUnrecognized, resultLastQuestion];
+            }
+
+            const nextStepId = selectedOption.nextStep;
+            if (nextStepId === undefined) {
+              console.log("empty next step on", selectedOption);
+              return;
+            }
+            const selectedChatbot = chatbotRepo.findChatbotById(flowId);
+
+            if (!selectedChatbot) {
+              console.error(
+                "selected chatbot config not found with id",
+                flowId
+              );
+              return;
+            }
+
+            const selectedStep = selectedChatbot.steps.find(
+              ({ id }) => id === nextStepId
             );
-            return;
-          }
+
+            if (!selectedStep) {
+              console.warn(
+                "step not found with step id ",
+                nextStepId,
+                " on session id ",
+                activeSession._id
+              );
+              return;
+            }
+            return [
+              {
+                type: "outbound",
+                response: await whatsappClient.sendMessageStep(
+                  senderNumber,
+                  selectedStep
+                ),
+                question: selectedStep,
+              },
+            ];
+          };
+
+          const resultSentMessage = (await getNextMessage()) ?? [];
+          activeSession.messages.push(...resultSentMessage);
+          await sessionRepo.replaceSession(activeSession);
         }
       } else {
         console.log(senderNumber, " don't have session");
@@ -98,17 +144,22 @@ export class ChatbotService {
           senderNumber,
           steps
         );
-        await sessionRepo.createSession(senderNumber, botNumber, [
-          {
-            type: "inbound",
-            response: triggerMessage,
-          },
-          {
-            type: "outbound",
-            question: steps,
-            response: nextMessage,
-          },
-        ]);
+        await sessionRepo.createSession(
+          senderNumber,
+          botNumber,
+          selectedChatbot._id,
+          [
+            {
+              type: "inbound",
+              response: triggerMessage,
+            },
+            {
+              type: "outbound",
+              question: steps,
+              response: nextMessage,
+            },
+          ]
+        );
       }
     } catch (error) {
       console.error("onReceiveMessage error", error);

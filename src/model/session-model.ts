@@ -13,6 +13,7 @@ export interface SessionMessage {
 export interface SessionModel {
   _id: string;
   from: string;
+  flowId: string;
   botNumber: string;
   createdAt: Date;
   updatedAt: Date;

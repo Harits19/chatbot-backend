@@ -25,12 +25,14 @@ export class SessionRepo {
   createSession = async (
     from: string,
     botNumber: string,
+    flowId: string,
     message: SessionMessage[]
   ) => {
     const newSession: SessionModel = {
       _id: uid(),
       botNumber,
       from,
+      flowId,
       createdAt: new Date(),
       updatedAt: new Date(),
       messages: message,
