@@ -6,4 +6,5 @@ dotenv.config({
 
 export const ENV = {
   MONGO_CLIENT: process.env.MONGO_CLIENT,
+  BOT_NUMBER: process.env.BOT_NUMBER,
 };

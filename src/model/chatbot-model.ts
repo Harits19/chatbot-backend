@@ -1,3 +1,5 @@
+import { ENV } from "../constan/env-constant";
+
 export interface ChatbotModel {
   _id: string;
   botNumber: string;
@@ -17,6 +19,7 @@ export interface IChatbotStep {
   id?: number;
   body: string;
   responseType: ResponseType;
+  nextStep?: number;
   option?: ChatbotOption[];
 }
 
@@ -53,7 +56,7 @@ export class ChatbotStep implements IChatbotStep {
 export const dummyRepo: ChatbotModel[] = [
   {
     _id: "dummyId",
-    botNumber: "628881852685@c.us",
+    botNumber: `${ENV.BOT_NUMBER}@c.us`,
     trigger: ["test chatbot"],
     steps: [
       {
